@@ -1,19 +1,5 @@
 # c-assembler
 
-Fork of [MarcoMeijer/c-assembler](https://github.com/MarcoMeijer/c-assembler) with extra functionality.
-
-## Building and running
-
-```
-gcc -Wall -o assembler main.c scanner.c parser.c
-./assembler                     # compiles example.asm
-./assembler program.asm         # compiles another file
-./assembler -o out.txt program.asm   # writes the binary to a file
-./assembler -h                  # help
-```
-
-On Windows (MinGW) the executable is `assembler.exe`.
-
 ## Instruction set
 
 ```
@@ -55,6 +41,16 @@ mov [reg2], reg1 ; Move register 1 into RAM at address register 2
     ; 11 000001
 ```
 
+## Building and running
+
+```
+gcc -Wall -o assembler main.c scanner.c parser.c
+./assembler                     # compiles example.asm
+./assembler program.asm         # compiles another file
+./assembler -o out.txt program.asm   # writes the binary to a file
+./assembler -h                  # help
+```
+
 ## Added functionality
 
 | # | Feature | Points |
@@ -67,24 +63,3 @@ mov [reg2], reg1 ; Move register 1 into RAM at address register 2
 | 6 | Reading from RAM: `mov reg1, [reg2]` -> `11000000` | 50 |
 | 7 | Constants into any register: `mov reg2, 10` becomes `mov reg1, 10` + `mov reg2, reg1` | 50 |
 | 8 | Error messages now show the token that was received | 50 |
-
-Notes:
-
-- Feature 7 uses reg1 as a temporary register, so `mov regX, CONSTANT` (X != 1) overwrites reg1.
-- ALU instructions check that the operands are exactly `reg1` and `reg2` (in that order), because the hardware always reads those two registers.
-- Examples of the new error messages:
-  - `Compile error on line 1: unknown identifier 'foo'.`
-  - `Error on line 1: Unexpected token 'reg1', expected an instruction.`
-  - `Error on line 1: Expected either a register, a constant or [reg2] for move operation, but got ','.`
-
-## Bug fixes
-
-- `tokens` and `final_binary` were defined in the header files, which causes a
-  "multiple definition" linker error with GCC 10 or newer. They are now declared
-  `extern` in the headers and defined in the `.c` files.
-- `read_file` did not add a `'\0'` at the end of the buffer, but the scanner
-  relies on it to detect the end of the file (undefined behaviour). It also
-  checked `buffer == NULL` instead of `*buffer == NULL`.
-- Added bounds checks for the token array and the output binary.
-- Very large constants can no longer overflow `int` and bypass the size check.
-- Opening a file that does not exist now prints an error message.
